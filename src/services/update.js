@@ -4,6 +4,11 @@ const xml2js = require('xml2js')
 const dataService = require('../services/data')
 const logger = require('../utils/logger')
 
+const cleanup = (targetname) => {
+  fs.unlinkSync(`${targetname}.xml`)
+  fs.unlinkSync(`${targetname}.zip`)
+}
+
 const unzip = (targetname, data) => {
   try {
     const zipfile = `${targetname}.zip`
@@ -18,7 +23,6 @@ const unzip = (targetname, data) => {
       const filename = entries[0].entryName
       zip.extractEntryTo(filename, '.')
       fs.renameSync(filename, xmlfile)
-      fs.unlinkSync(zipfile)
     } else {
       logger.error('ERROR: ZIP file was empty!')
     }
@@ -44,16 +48,6 @@ const parseXmlToJs = (filepath) => {
   if (jsondata)
     return jsondata.Root.data
   return null
-}
-
-const downloadPopulationZip = () => {
-  return dataService.getPopulationData()
-          .then(data => unzip('population', data))
-}
-
-const downloadEmissionZip = () => {
-  return dataService.getEmissionData()
-          .then(data => unzip('emissions', data))
 }
 
 const downloadAllZip = () => {
@@ -105,6 +99,8 @@ const update = () => {
     const population = parseXmlToJs('population.xml')
     const emissions = parseXmlToJs('emissions.xml')
     const combined = combineData(population.record, emissions.record)
+    cleanup('population')
+    cleanup('emissions')
     return combined
   })
 }
