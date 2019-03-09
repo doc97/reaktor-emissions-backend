@@ -58,37 +58,42 @@ const downloadAllZip = () => {
           })
 }
 
+const parseFieldData = (elem) => {
+  const fields = elem.field
+  const countryKey = fields[0].$.key
+  const countryName = fields[0]._
+  const year = fields[2]._
+  const value = fields[3]._
+
+  return { countryKey, countryName, year, value }
+}
+
+const setBasicData = (container, key, name) => {
+  if (container[key] === undefined)
+    container[key] = {}
+  container[key].key = key
+  container[key].name = name
+}
+
+const setYearlyData = (country, year, propertyName, value) => {
+  if (country.yearlyData === undefined)
+    country.yearlyData = {}
+  if (country.yearlyData[year] === undefined)
+    country.yearlyData[year] = {}
+  country.yearlyData[year][propertyName] = value !== undefined ? value : null
+}
+
 const combineData = (populationData, emissionData) => {
   combined = {}
   populationData.forEach(elem => {
-    const fields = elem.field
-    const countryKey = fields[0].$.key
-    const countryName = fields[0]._
-    const year = fields[2]._
-    const value = fields[3]._
-    
-    if (combined[countryKey] === undefined)
-      combined[countryKey] = {}
-    combined[countryKey].name = countryName
-
-    if (combined[countryKey][year] === undefined)
-      combined[countryKey][year] = {}
-    combined[countryKey][year].population = value !== undefined ? value : null
+    const data = parseFieldData(elem)
+    setBasicData(combined, data.countryKey, data.countryName)
+    setYearlyData(combined[data.countryKey], data.year, 'population', data.value)
   })
   emissionData.forEach(elem => {
-    const fields = elem.field
-    const countryKey = fields[0].$.key
-    const countryName = fields[0]._
-    const year = fields[2]._
-    const value = fields[3]._
-    
-    if (combined[countryKey] === undefined)
-      combined[countryKey] = {}
-    combined[countryKey].name = countryName
-
-    if (combined[countryKey][year] === undefined)
-      combined[countryKey][year] = {}
-    combined[countryKey][year].emissions = value !== undefined ? value : null
+    const data = parseFieldData(elem)
+    setBasicData(combined, data.countryKey, data.countryName)
+    setYearlyData(combined[data.countryKey], data.year, 'emissions', data.value)
   })
 
   return combined
