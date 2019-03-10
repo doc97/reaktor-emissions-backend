@@ -1,6 +1,8 @@
 const emissionRouter = require('express').Router()
 const Store = require('data-store')
 const store = new Store('reaktor-emission-stats')
+const logger = require('../utils/logger')
+const updateService = require('../services/update')
 
 const getCountry = (request, response) => {
   if (store.hasOwn(request.params.key))
@@ -45,6 +47,14 @@ emissionRouter.get('/:key/:year', (request, response) => {
   if (!year)
     return
   response.json(year)
+})
+
+emissionRouter.post('/update', (request, response) => {
+  updateService.update().then(result => {
+    store.set(result)
+    response.json(JSON.parse(store.json()))
+    logger.info('Updated!')
+  })
 })
 
 module.exports = emissionRouter
