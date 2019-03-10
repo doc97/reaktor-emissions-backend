@@ -1,5 +1,5 @@
 {
-  "name": "reaktor-weather-backend",
+  "name": "reaktor-emissions-backend",
   "version": "0.0.1",
   "description": "Backend for Reaktor's preliminary exercise 'reaktor-weather'",
   "main": "index.js",
